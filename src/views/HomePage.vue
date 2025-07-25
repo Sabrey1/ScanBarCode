@@ -1,56 +1,41 @@
 <template>
-  <ion-page>
-    <ion-header :translucent="true">
+   <ion-menu content-id="main-content">
+    <ion-header>
       <ion-toolbar>
-        <ion-title>Blank</ion-title>
+        <ion-title>Menu Content</ion-title>
       </ion-toolbar>
     </ion-header>
+    <ion-content class="ion-padding">This is the menu content.</ion-content>
+  </ion-menu>
 
-    <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar>
-          <ion-title size="large">Blank</ion-title>
-        </ion-toolbar>
-      </ion-header>
 
-      <div id="container">
-        <strong>Ready to create an app?</strong>
-        <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
-      </div>
+  <ion-page id="main-content" >
+    <ion-header >
+      <ion-toolbar>
+  <ion-buttons slot="start">
+    <ion-menu-button></ion-menu-button>
+  </ion-buttons>
+  <ion-title>Menu</ion-title>
+  <ion-buttons slot="end" class="ion-margin-end" @click="scan">
+    <i class="fas fa-qrcode"></i>
+  </ion-buttons>
+</ion-toolbar>
+
+    </ion-header>
+    <ion-content class="ion-no-padding">
+      <ComMenu/>
     </ion-content>
   </ion-page>
 </template>
 
-<script setup lang="ts">
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
+<script setup>
+  import { IonButtons, IonContent, IonHeader, IonMenu, IonMenuButton, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
+  import ComMenu from "../views/components/ComMenu.vue"
+ 
+function scan(){
+  alert("scan")
+}
 </script>
-
 <style scoped>
-#container {
-  text-align: center;
-  
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
-}
-
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-  
-  color: #8c8c8c;
-  
-  margin: 0;
-}
-
-#container a {
-  text-decoration: none;
-}
+/* css */
 </style>
