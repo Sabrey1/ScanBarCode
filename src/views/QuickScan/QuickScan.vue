@@ -1,9 +1,10 @@
 <template>
 <h1>this is QuickScan</h1>
+<ComScanBarcodeAndroid @onScanBarcode="onScanBarcode"/>
 </template>
 
 <script setup>
-// test
+import ComScanBarcodeAndroid from './components/ComScanBarcodeAndroid.vue'
 </script>
 
 <style>

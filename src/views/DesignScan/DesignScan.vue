@@ -52,25 +52,23 @@
       >{{ txt.content }}</div>
     </div>
 
-    <div class="buttons text-center" style="margin-top: 20px;text-align: center;">
+    <div class="buttons text-center" style="margin-top: 20px;">
       <ion-button @click="triggerUpload" size="normal" class="flex items-center space-x-2">
         <i class="fa-solid fa-upload" style="margin-right: 10px;"></i>
         <span>Upload</span>
       </ion-button>
       <ion-button @click="scan" size="normal" class="flex items-center space-x-2">
-        <i class="fa-solid fa-upload" style="margin-right: 10px;"></i>
-        <span>Scan QR</span>
+        <ion-icon :icon="scanOutline "></ion-icon>
+        <span style="margin-left: 10px;">Scan QR</span>
       </ion-button>
       <ion-button @click="generateQr" size="normal" class="flex items-center space-x-2">
-        <i class="fa-solid fa-upload" style="margin-right: 10px;"></i>
-        <span>Generate QR</span>
+        <ion-icon :icon="qrCodeOutline"></ion-icon>
+        <span style="margin-left: 10px;">Generate QR</span>
       </ion-button>
-
       <ion-button @click="addText" size="normal" class="flex items-center space-x-2">
         <i class="fa-solid fa-pen-to-square" style="margin-right: 10px;"></i>
         <span>Add Text</span>
       </ion-button>
-
       <ion-button @click="print" size="normal" class="flex items-center space-x-2">
         <i class="fa-solid fa-print" style="margin-right: 10px;"></i>
         <span>Print</span>
@@ -82,7 +80,9 @@
 <script setup>
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { IonHeader, IonTitle, IonToolbar, IonContent, IonButton } from '@ionic/vue'
+import { IonIcon } from '@ionic/vue';
 
+import { logInOutline, planet, qrCodeOutline, scanOutline } from 'ionicons/icons';
 const fileInput = ref(null)
 const imageUrl = ref(null)
 
@@ -317,11 +317,11 @@ onBeforeUnmount(() => {
 .text-box {
   padding: 4px 8px;
   min-width: 80px;
-  background: white;
-  border: 1px solid #aaa;
+  /* background: white; */
+  /* border: 1px solid #aaa; */
   border-radius: 4px;
   cursor: grab;
-  box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+  /* box-shadow: 1px 1px 4px rgba(0,0,0,0.2); */
   white-space: pre-wrap;
   outline: none;
   user-select: text;
