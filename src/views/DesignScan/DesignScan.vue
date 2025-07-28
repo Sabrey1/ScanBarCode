@@ -6,6 +6,25 @@
   </ion-header>
 
   <ion-content class="ion-padding">
+    <label>
+        Canvas Width (mm):
+        <input
+          type="number"
+          v-model.number="canvasWidthMM"
+          @change="updateCanvasSizeFromMM"
+          min="10"
+        />
+      </label>
+
+      <label>
+        Canvas Height (mm):
+        <input
+          type="number"
+          v-model.number="canvasHeightMM"
+          @change="updateCanvasSizeFromMM"
+          min="10"
+        />
+      </label>
     <div class="upload-container">
       <!-- Hidden file input -->
       <input
