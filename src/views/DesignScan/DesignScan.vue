@@ -6,7 +6,13 @@
   </ion-header>
 
   <ion-content class="ion-padding">
-    <label>
+    <div class="controls">
+      <label>
+        Barcode Value:
+        <input v-model="barcodeData" />
+      </label>
+
+      <label>
         Canvas Width (mm):
         <input
           type="number"
@@ -25,109 +31,133 @@
           min="10"
         />
       </label>
-    <div class="upload-container">
-      <!-- Hidden file input -->
-      <input
-        ref="fileInput"
-        type="file"
-        accept="image/*"
-        style="display: none;"
-        @change="onFileChange"
-      />
 
-      <!-- Draggable uploaded image -->
-      <div
-        v-if="imageUrl"
-        class="draggable"
-        :style="{ top: imagePos.y + 'px', left: imagePos.x + 'px' }"
-        @mousedown="startDragImage"
-        @touchstart.prevent="startTouchDragImage"
-      >
-        <img
-          :src="imageUrl"
-          alt="Uploaded"
-          width="160"
-          height="160"
-          draggable="false"
-          style="border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: grab;"
-        />
+      <!-- Scroll wrapper -->
+      <div style="overflow: auto">
+        <!-- Resizable upload container -->
+        <div
+          class="upload-container"
+          :style="{
+            width: canvasWidthPx + 'px',
+            height: canvasHeightPx + 'px'
+          }"
+        >
+          <!-- Hidden file input -->
+          <input
+            ref="fileInput"
+            type="file"
+            accept="image/*"
+            style="display: none;"
+            @change="onFileChange"
+          />
+
+          <!-- Draggable uploaded image -->
+          <div
+            v-if="imageUrl"
+            class="draggable"
+            :style="{ top: imagePos.y + 'px', left: imagePos.x + 'px' }"
+            @mousedown="startDragImage"
+            @touchstart.prevent="startTouchDragImage"
+          >
+            <img
+              :src="imageUrl"
+              alt="Uploaded"
+              width="160"
+              height="160"
+              draggable="false"
+              style="border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: grab;"
+            />
+          </div>
+
+          <!-- Draggable text boxes -->
+          <div
+            v-for="(txt, index) in texts"
+            :key="txt.id"
+            class="draggable text-box"
+            :style="{ top: txt.y + 'px', left: txt.x + 'px' }"
+            @mousedown="startDragText($event, index)"
+            @touchstart="onTouchStartText($event, index)"
+            @touchend="onTouchEndText"
+            contenteditable="true"
+            @input="onTextInput($event, index)"
+            @focus="focusedTextId = txt.id"
+            @blur="focusedTextId = null"
+            spellcheck="false"
+            tabindex="0"
+          >{{ txt.content }}</div>
+        </div>
       </div>
 
-      <!-- Draggable text boxes -->
-      <div
-        v-for="(txt, index) in texts"
-        :key="txt.id"
-        class="draggable text-box"
-        :style="{ top: txt.y + 'px', left: txt.x + 'px' }"
-        @mousedown="startDragText($event, index)"
-        @touchstart="onTouchStartText($event, index)"
-        @touchend="onTouchEndText"
-        contenteditable="true"
-        @input="onTextInput($event, index)"
-        @focus="focusedTextId = txt.id"
-        @blur="focusedTextId = null"
-        spellcheck="false"
-        tabindex="0"
-      >{{ txt.content }}</div>
-    </div>
+      <!-- Buttons -->
+      <div class="buttons text-center" style="margin-top: 20px;">
+        <ion-button @click="triggerUpload">
+          <i class="fa-solid fa-upload" style="margin-right: 10px;"></i>
+          <span>Upload</span>
+        </ion-button>
 
-    <div class="buttons text-center" style="margin-top: 20px;">
-      <ion-button @click="triggerUpload" size="normal" class="flex items-center space-x-2">
-        <i class="fa-solid fa-upload" style="margin-right: 10px;"></i>
-        <span>Upload</span>
-      </ion-button>
-      <ion-button @click="scan" size="normal" class="flex items-center space-x-2">
-        <ion-icon :icon="scanOutline "></ion-icon>
-        <span style="margin-left: 10px;">Scan QR</span>
-      </ion-button>
-      <ion-button @click="generateQr" size="normal" class="flex items-center space-x-2">
-        <ion-icon :icon="qrCodeOutline"></ion-icon>
-        <span style="margin-left: 10px;">Generate QR</span>
-      </ion-button>
-      <ion-button @click="addText" size="normal" class="flex items-center space-x-2">
-        <i class="fa-solid fa-pen-to-square" style="margin-right: 10px;"></i>
-        <span>Add Text</span>
-      </ion-button>
-      <ion-button @click="print" size="normal" class="flex items-center space-x-2">
-        <i class="fa-solid fa-print" style="margin-right: 10px;"></i>
-        <span>Print</span>
-      </ion-button>
+        <ion-button @click="scan">
+          <ion-icon :icon="scanOutline" />
+          <span style="margin-left: 10px;">Scan QR</span>
+        </ion-button>
+
+        <ion-button @click="generateQr">
+          <ion-icon :icon="qrCodeOutline" />
+          <span style="margin-left: 10px;">Generate QR</span>
+        </ion-button>
+
+        <ion-button @click="addText">
+          <i class="fa-solid fa-pen-to-square" style="margin-right: 10px;"></i>
+          <span>Add Text</span>
+        </ion-button>
+
+        <ion-button @click="print">
+          <i class="fa-solid fa-print" style="margin-right: 10px;"></i>
+          <span>Print</span>
+        </ion-button>
+      </div>
     </div>
   </ion-content>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
-import { IonHeader, IonTitle, IonToolbar, IonContent, IonButton } from '@ionic/vue'
-import { IonIcon } from '@ionic/vue';
+import { IonHeader, IonTitle, IonToolbar, IonContent, IonButton, IonIcon } from '@ionic/vue'
+import { scanOutline, qrCodeOutline } from 'ionicons/icons'
 
-import { logInOutline, planet, qrCodeOutline, scanOutline } from 'ionicons/icons';
 const fileInput = ref(null)
 const imageUrl = ref(null)
+const barcodeData = ref('123456789012')
+
+// Canvas Size in mm
+const canvasWidthMM = ref(100)
+const canvasHeightMM = ref(100)
+
+// Canvas size in px (computed from mm)
+const canvasWidthPx = ref(0)
+const canvasHeightPx = ref(0)
+
+function updateCanvasSizeFromMM() {
+  const dpi = 96
+  const mmToPx = dpi / 25.4
+  canvasWidthPx.value = canvasWidthMM.value * mmToPx
+  canvasHeightPx.value = canvasHeightMM.value * mmToPx
+}
 
 // Image position state
 const imagePos = reactive({ x: 100, y: 100 })
 
-// Dragging state for image
 let draggingImage = false
 let imageOffsetX = 0
 let imageOffsetY = 0
 let touchIdImage = null
 
-// Multiple texts state
 const texts = reactive([])
-
-// Dragging state for texts
 let draggingTextIndex = null
 let draggingText = false
 let textOffsetX = 0
 let textOffsetY = 0
 let touchIdText = null
-
-// Track currently focused text id for delete key
 const focusedTextId = ref(null)
-
-// Touch drag delay tracking for text dragging
 let touchDragTimeout = null
 let isDraggingTouch = false
 
@@ -138,9 +168,11 @@ function triggerUpload() {
 function scan() {
   alert('Scan QR function called')
 }
+
 function generateQr() {
   alert('Generate QR function called')
 }
+
 function onFileChange(event) {
   const file = event.target.files[0]
   if (file && file.type.startsWith('image/')) {
@@ -152,7 +184,7 @@ function onFileChange(event) {
   }
 }
 
-// Image drag handlers
+// Image drag
 function startDragImage(event) {
   draggingImage = true
   imageOffsetX = event.clientX - imagePos.x
@@ -178,7 +210,7 @@ function onMouseMove(event) {
   }
 }
 
-function onMouseUp(event) {
+function onMouseUp() {
   draggingImage = false
   draggingText = false
 }
@@ -215,7 +247,7 @@ function onTouchEnd(event) {
   isDraggingTouch = false
 }
 
-// Text drag handlers
+// Text box
 function startDragText(event, index) {
   draggingText = true
   draggingTextIndex = index
@@ -259,7 +291,6 @@ function print() {
   alert('Print function called')
 }
 
-// Touch start handler for text boxes with delay to differentiate tap vs drag
 function onTouchStartText(event, index) {
   if (touchDragTimeout) clearTimeout(touchDragTimeout)
   isDraggingTouch = false
@@ -269,20 +300,14 @@ function onTouchStartText(event, index) {
   }, 150)
 }
 
-// Touch end handler for text boxes
 function onTouchEndText(event) {
   if (touchDragTimeout) {
     clearTimeout(touchDragTimeout)
     touchDragTimeout = null
   }
-  if (!isDraggingTouch) {
-    // Tap: do nothing, allow editing & keyboard
-    return
-  }
-  // Drag handled in global onTouchEnd
+  if (!isDraggingTouch) return
 }
 
-// Delete text box on Delete key only (Backspace deletes text normally)
 function onKeyDown(event) {
   if (event.key === 'Delete' && focusedTextId.value !== null) {
     const index = texts.findIndex(t => t.id === focusedTextId.value)
@@ -303,6 +328,8 @@ onMounted(() => {
   window.addEventListener('touchcancel', onTouchEnd)
 
   window.addEventListener('keydown', onKeyDown)
+
+  updateCanvasSizeFromMM()
 })
 
 onBeforeUnmount(() => {
@@ -319,9 +346,8 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .upload-container {
+  margin-top: 20px;
   position: relative;
-  width: 100%;
-  height: 400px;
   background-color: #eee;
   border-radius: 12px;
   overflow: hidden;
@@ -336,11 +362,8 @@ onBeforeUnmount(() => {
 .text-box {
   padding: 4px 8px;
   min-width: 80px;
-  /* background: white; */
-  /* border: 1px solid #aaa; */
   border-radius: 4px;
   cursor: grab;
-  /* box-shadow: 1px 1px 4px rgba(0,0,0,0.2); */
   white-space: pre-wrap;
   outline: none;
   user-select: text;
