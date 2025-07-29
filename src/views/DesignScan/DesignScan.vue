@@ -7,6 +7,8 @@
 
   <ion-content class="ion-padding">
     <div class="controls">
+     
+
       <label>
         Barcode Value:
         <input v-model="barcodeData" />
@@ -50,7 +52,18 @@
             style="display: none;"
             @change="onFileChange"
           />
+ <!-- <div v-if="qrCodeImage" style="margin-top: 20px; text-align: center;">
+  <img :src="qrCodeImage" alt="Generated QR Code" width="180" height="180" />
+</div> -->
 
+<div
+  v-if="qrCodeImage"
+  ref="qrCodeElement"
+  class="draggable-item"
+  :style="{ top: qrPosition.top + 'px', left: qrPosition.left + 'px' }"
+>
+  <img :src="qrCodeImage" alt="QR Code" width="180" height="180" />
+</div>
           <!-- Draggable uploaded image -->
           <div
             v-if="imageUrl"
@@ -123,11 +136,17 @@
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { IonHeader, IonTitle, IonToolbar, IonContent, IonButton, IonIcon } from '@ionic/vue'
 import { scanOutline, qrCodeOutline } from 'ionicons/icons'
+import QRCode from 'qrcode'
+
+
+const qrCodeImage = ref('')
 
 const fileInput = ref(null)
 const imageUrl = ref(null)
 const barcodeData = ref('123456789012')
-
+ 
+const qrPosition = reactive({ top: 100, left: 100 })
+const qrCodeElement = ref<HTMLElement | null>(null)
 // Canvas Size in mm
 const canvasWidthMM = ref(100)
 const canvasHeightMM = ref(100)
@@ -169,10 +188,7 @@ function scan() {
   alert('Scan QR function called')
 }
 
-function generateQr() {
-  alert('Generate QR function called')
-}
-
+ 
 function onFileChange(event) {
   const file = event.target.files[0]
   if (file && file.type.startsWith('image/')) {
@@ -183,6 +199,18 @@ function onFileChange(event) {
     imageUrl.value = null
   }
 }
+
+
+async function generateQr() {
+  try {
+    const dataUrl = await QRCode.toDataURL(barcodeData.value)
+    qrCodeImage.value = dataUrl
+  } catch (err) {
+    console.error('Failed to generate QR code:', err)
+  }
+}
+
+
 
 // Image drag
 function startDragImage(event) {
